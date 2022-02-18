@@ -1,33 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { auth, logInWithEmailAndPassword } from "../../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import './Login.css';
-import { Link } from 'react-router-dom';
-import { auth } from './firebase';
 
 function Login() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-
-    const signIn = e => {
-        e.preventDefault();
-
-        // firebase login
+    const [user, loading, error] = useAuthState(auth);
+    const navigate = useNavigate();
+    useEffect(() => {
+    if (loading) {
+      // maybe trigger a loading screen
+    return;
     }
+    if (user) navigate("/dashboard");
+    }, [user, loading]);
 
-    const register = e => {
-        e.preventDefault();
-
-        // firebase register
-
-        auth
-        .createUserWithEmailAndPassword(email, password)
-        .then((auth) => {
-            console.log(auth);
-        })
-        .catch(error => alert(error.message))
-    }
-
-  return (
+    return (
     <div className='login'>
         <Link to={'/'}>
         <img
@@ -54,13 +45,13 @@ function Login() {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                 />
-
+                <Link to="/">
                 <button 
-                    type={'submit'}
-                    onClick={signIn}
+                    onClick={() => logInWithEmailAndPassword(email, password)}
                     className='login__signInButton'>
                     Sign In
                 </button>
+                </Link>
             </form>
 
             <p>
@@ -69,12 +60,16 @@ function Login() {
                 our Cookies Notice and our Interest-Based Ads Notice. 
             </p>
 
+            <div className="login__resetButton">
+                <Link to="/reset">Forgot Password</Link>
+            </div>
+
+            <Link to="/register">
             <button 
-                type={'submit'}
-                onClick={register}
                 className='login__registerButton'>
                 Create your Amazon Account
             </button>
+            </Link>
         </div>
     </div>
   )
